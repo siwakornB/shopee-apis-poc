@@ -1,4 +1,4 @@
-import { Body, Controller, Get, Post, Query } from '@nestjs/common';
+import { Body, Controller, Get, Patch, Post, Query } from '@nestjs/common';
 import { ShopeeService } from './shopee/shopee.service';
 
 @Controller()
@@ -6,8 +6,8 @@ export class AppController {
     constructor(private readonly shopeeService: ShopeeService) {}
 
     @Get('/gen-code-url')
-    async generateCodeUrl() // @Query('partnerKey') partnerKey: string // @Query('redirectUrl') redirectUrl: string, // @Query('partnerId') partnerId: number,
-    {
+    async generateCodeUrl() {
+        // @Query('partnerKey') partnerKey: string // @Query('redirectUrl') redirectUrl: string, // @Query('partnerId') partnerId: number,
         const url = await this.shopeeService.generateCodeUrl();
         return { url };
     }
@@ -49,6 +49,24 @@ export class AppController {
     // @Query('shopId') shopId: number
     : Promise<Object> {
         const response = this.shopeeService.getShipmentList();
+        return response;
+    }
+
+    @Get('/shipping/get-shipment-param')
+    async getShipmentParam(@Query('orderSn') orderSn: string): Promise<Object> {
+        const response = this.shopeeService.getShipmentParam(orderSn);
+        return response;
+    }
+
+    @Patch('/shipping/ship-order')
+    async shipOrder(@Query('orderSn') orderSn: string): Promise<Object> {
+        const response = this.shopeeService.shipOrder(orderSn);
+        return response;
+    }
+
+    @Get('/shipping/get-tracking-number')
+    async getTrackingNo(@Query('orderSn') orderSn: string): Promise<Object> {
+        const response = this.shopeeService.getTrackingNo(orderSn);
         return response;
     }
 }

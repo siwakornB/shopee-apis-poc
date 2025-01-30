@@ -217,9 +217,205 @@ export class ShopeeService {
             'Content-Type': 'application/json',
         };
 
-        const res = await this.executeGet<ShopeeResponse>(url, headers);
+        // const res = await this.executeGet<ShopeeResponse>(url, headers);
 
-        return res.response;
+        // return res.response;
+
+        return {
+            order_list: [
+                {
+                    order_sn: '250129R77HHR8W',
+                    package_number: '38027870177402',
+                },
+                {
+                    order_sn: '250129QSCYFRF6',
+                    package_number: '38027870177403',
+                },
+            ],
+            more: false,
+            next_cursor: '',
+        };
+    }
+
+    async getShipmentParam(orderSn: string): Promise<Object> {
+        const host = 'https://partner.test-stable.shopeemobile.com';
+        const path = '/api/v2/logistics/get_shipping_parameter';
+        orderSn;
+        const authorData = await ShopeeAuthorization.findOne();
+        const accessToken = !!authorData ? authorData.accessToken : '';
+
+        const { sign, timestamp } = this.calculateSign(
+            this.partnerId,
+            path,
+            accessToken,
+            this.shopId,
+            this.partnerKey
+        );
+
+        const params = {
+            // common params
+            partner_id: this.partnerId,
+            sign: sign,
+            timestamp: timestamp,
+            access_token: accessToken,
+            shop_id: this.shopId,
+
+            // required api params
+            order_sn: orderSn,
+
+            // optional
+        };
+
+        const queraParam = qs.stringify(params, { arrayFormat: 'brackets' });
+        const url = `${host}${path}?${queraParam}`;
+
+        const headers = {
+            'Content-Type': 'application/json',
+        };
+
+        // const res = await this.executeGet<ShopeeResponse>(url, headers);
+        // return res.response;
+
+        return {
+            error: '',
+            message: '',
+            response: {
+                info_needed: {
+                    dropoff: [],
+                    pickup: ['address_id', 'pickup_time_id'],
+                },
+                dropoff: null,
+                pickup: {
+                    address_list: [
+                        {
+                            address_id: 123,
+                            region: 'SG',
+                            state: '',
+                            city: '',
+                            district: '',
+                            town: '',
+                            address: '',
+                            zipcode: '40009',
+                            address_flag: [
+                                'default_address',
+                                'pickup_address',
+                                'return_address',
+                            ],
+                            time_slot_list: null,
+                        },
+                        {
+                            address_id: 234,
+                            region: 'SG',
+                            state: '',
+                            city: '',
+                            district: '',
+                            town: '',
+                            address: 'hhh, #34',
+                            zipcode: 'xxx',
+                            address_flag: [],
+                            time_slot_list: null,
+                        },
+                    ],
+                },
+            },
+            request_id: '2880a5a28510424eaa3288fd941fae2c',
+        };
+    }
+
+    async shipOrder(orderSn: string): Promise<Object> {
+        const host = 'https://partner.test-stable.shopeemobile.com';
+        const path = '/api/v2/logistics/ship_order';
+
+        const authorData = await ShopeeAuthorization.findOne();
+        const accessToken = !!authorData ? authorData.accessToken : '';
+
+        const { sign, timestamp } = this.calculateSign(
+            this.partnerId,
+            path,
+            accessToken,
+            this.shopId,
+            this.partnerKey
+        );
+
+        const params = {
+            // common params
+            partner_id: this.partnerId,
+            sign: sign,
+            timestamp: timestamp,
+            access_token: accessToken,
+            shop_id: this.shopId,
+
+            // required api params
+            order_sn: orderSn,
+
+            // optional
+        };
+
+        const queraParam = qs.stringify(params, { arrayFormat: 'brackets' });
+        const url = `${host}${path}?${queraParam}`;
+
+        const headers = {
+            'Content-Type': 'application/json',
+        };
+
+        // const res = await this.executeGet<ShopeeResponse>(url, headers);
+        // return res.response;
+
+        return {
+            error: '',
+            message: '',
+            request_id: '3dad66f43b8447d282ae6da36626c6b7',
+        };
+    }
+
+    async getTrackingNo(orderSn: string): Promise<Object> {
+        const host = 'https://partner.test-stable.shopeemobile.com';
+        const path = '/api/v2/logistics/get_tracking_number';
+
+        const authorData = await ShopeeAuthorization.findOne();
+        const accessToken = !!authorData ? authorData.accessToken : '';
+
+        const { sign, timestamp } = this.calculateSign(
+            this.partnerId,
+            path,
+            accessToken,
+            this.shopId,
+            this.partnerKey
+        );
+
+        const params = {
+            // common params
+            partner_id: this.partnerId,
+            sign: sign,
+            timestamp: timestamp,
+            access_token: accessToken,
+            shop_id: this.shopId,
+
+            // required api params
+            order_sn: orderSn,
+
+            // optional
+        };
+
+        const queraParam = qs.stringify(params, { arrayFormat: 'brackets' });
+        const url = `${host}${path}?${queraParam}`;
+
+        const headers = {
+            'Content-Type': 'application/json',
+        };
+
+        // const res = await this.executeGet<ShopeeResponse>(url, headers);
+        // return res.response;
+
+        return {
+            error: '',
+            message: '',
+            response: {
+                tracking_number: 'MY200448706479IT',
+                first_mile_tracking_number: 'CNF877146678717210312',
+            },
+            request_id: '9d07076ffda5407bb7c559f0b82ed91e',
+        };
     }
 
     private async executeGet<T>(url: string, headers: Object): Promise<T> {
