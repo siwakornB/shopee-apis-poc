@@ -3,59 +3,63 @@ import axios from 'axios';
 import * as crypto from 'crypto';
 import * as qs from 'qs'; // this format is working, do not use
 import { ShopeeAuthorization } from 'src/entities/shopeeAuthorization';
+import * as dotenv from 'dotenv';
 
 @Injectable()
 export class ShopeeService {
-    async generateCodeUrl(
-        partnerId: number,
-        // redirectUrl: string,
-        partnerKey: string
-    ) {
+    private partnerId = Number.parseInt(process.env.PARTNER_ID || '');
+    private partnerKey = process.env.PARTNER_KEY || '';
+    private shopId = Number.parseInt(process.env.SHOP_ID || '');
+
+    async generateCodeUrl() {
+        // partnerKey: string // redirectUrl: string, // partnerId: number,
         const timestamp = Math.floor(Date.now() / 1000);
         // const timestamp = 1738058203;
         const host = 'https://partner.test-stable.shopeemobile.com';
         const path = '/api/v2/shop/auth_partner';
         const redirectUrl = 'https://open.shopee.com/';
 
-        const tmpBaseString = `${partnerId}${path}${timestamp}`;
+        const tmpBaseString = `${this.partnerId}${path}${timestamp}`;
         const baseString = Buffer.from(tmpBaseString).toString('utf-8');
         console.log('base', baseString);
-        const encodedPartnerKey = Buffer.from(partnerKey).toString('utf-8');
+        const encodedPartnerKey = Buffer.from(this.partnerKey).toString(
+            'utf-8'
+        );
         const sign = crypto
             .createHmac('sha256', encodedPartnerKey)
             .update(baseString)
             .digest('hex');
 
-        const url = `${host}${path}?partner_id=${partnerId}&timestamp=${timestamp}&sign=${sign}&redirect=${redirectUrl}`;
+        const url = `${host}${path}?partner_id=${this.partnerId}&timestamp=${timestamp}&sign=${sign}&redirect=${redirectUrl}`;
 
         return url;
     }
 
     async getTokenAccessTokenShopLevel(
-        code: string,
-        partnerId: number,
-        partnerKey: string,
-        shopId: number
+        code: string
+        // partnerId: number,
+        // partnerKey: string,
+        // shopId: number
     ): Promise<{ accessToken: string; refreshToken: string }> {
         //https://partner.test-stable.shopeemobile.com/api/v2/auth/token/get
         const host = 'https://partner.test-stable.shopeemobile.com';
         const path = '/api/v2/auth/token/get';
 
         const { sign, timestamp } = this.calculateAuthenSign(
-            partnerId,
+            this.partnerId,
             path,
-            partnerKey
+            this.partnerKey
         );
 
-        const url = `${host}${path}?partner_id=${partnerId}&timestamp=${timestamp}&sign=${sign}`;
+        const url = `${host}${path}?partner_id=${this.partnerId}&timestamp=${timestamp}&sign=${sign}`;
 
         const headers = {
             'Content-Type': 'application/json',
         };
         const body = {
             code: code,
-            shop_id: shopId,
-            partner_id: partnerId,
+            shop_id: this.shopId,
+            partner_id: this.partnerId,
         };
 
         const res = await this.executePost<{
@@ -80,11 +84,10 @@ export class ShopeeService {
         }
     }
 
-    async getOrderList(
-        partnerId: number,
-        partnerKey: string,
-        shopId: number
-    ): Promise<Object> {
+    async getOrderList() // partnerId: number,
+    // partnerKey: string,
+    // shopId: number
+    : Promise<Object> {
         const host = 'https://partner.test-stable.shopeemobile.com';
         const path = '/api/v2/order/get_order_list';
 
@@ -92,20 +95,20 @@ export class ShopeeService {
         const accessToken = !!authorData ? authorData.accessToken : '';
 
         const { sign, timestamp } = this.calculateSign(
-            partnerId,
+            this.partnerId,
             path,
             accessToken,
-            shopId,
-            partnerKey
+            this.shopId,
+            this.partnerKey
         );
 
         const params = {
             // common params
-            partner_id: partnerId,
+            partner_id: this.partnerId,
             sign: sign,
             timestamp: timestamp,
             access_token: accessToken,
-            shop_id: shopId,
+            shop_id: this.shopId,
 
             // required api params
             time_range_field: 'create_time',
@@ -130,9 +133,9 @@ export class ShopeeService {
     }
 
     async getOrderDetails(
-        partnerId: number,
-        partnerKey: string,
-        shopId: number,
+        // partnerId: number,
+        // partnerKey: string,
+        // shopId: number,
         orderSnList: string
     ): Promise<Object> {
         const host = 'https://partner.test-stable.shopeemobile.com';
@@ -142,20 +145,20 @@ export class ShopeeService {
         const accessToken = !!authorData ? authorData.accessToken : '';
 
         const { sign, timestamp } = this.calculateSign(
-            partnerId,
+            this.partnerId,
             path,
             accessToken,
-            shopId,
-            partnerKey
+            this.shopId,
+            this.partnerKey
         );
 
         const params = {
             // common params
-            partner_id: partnerId,
+            partner_id: this.partnerId,
             sign: sign,
             timestamp: timestamp,
             access_token: accessToken,
-            shop_id: shopId,
+            shop_id: this.shopId,
 
             // required api params
             order_sn_list: orderSnList,
@@ -177,11 +180,7 @@ export class ShopeeService {
         return res.response;
     }
 
-    async getShipmentList(
-        partnerId: number,
-        partnerKey: string,
-        shopId: number
-    ): Promise<Object> {
+    async getShipmentList(): Promise<Object> {
         const host = 'https://partner.test-stable.shopeemobile.com';
         const path = '/api/v2/order/get_shipment_list';
 
@@ -189,20 +188,20 @@ export class ShopeeService {
         const accessToken = !!authorData ? authorData.accessToken : '';
 
         const { sign, timestamp } = this.calculateSign(
-            partnerId,
+            this.partnerId,
             path,
             accessToken,
-            shopId,
-            partnerKey
+            this.shopId,
+            this.partnerKey
         );
 
         const params = {
             // common params
-            partner_id: partnerId,
+            partner_id: this.partnerId,
             sign: sign,
             timestamp: timestamp,
             access_token: accessToken,
-            shop_id: shopId,
+            shop_id: this.shopId,
 
             // required api params
             page_size: 20,
