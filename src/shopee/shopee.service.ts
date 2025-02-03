@@ -10,12 +10,12 @@ export class ShopeeService {
     private partnerId = Number.parseInt(process.env.PARTNER_ID || '');
     private partnerKey = process.env.PARTNER_KEY || '';
     private shopId = Number.parseInt(process.env.SHOP_ID || '');
+    private host = process.env.SHOPEE_HOST;
 
     async generateCodeUrl() {
         // partnerKey: string // redirectUrl: string, // partnerId: number,
         const timestamp = Math.floor(Date.now() / 1000);
         // const timestamp = 1738058203;
-        const host = 'https://partner.test-stable.shopeemobile.com';
         const path = '/api/v2/shop/auth_partner';
         const redirectUrl = 'https://open.shopee.com/';
 
@@ -30,7 +30,7 @@ export class ShopeeService {
             .update(baseString)
             .digest('hex');
 
-        const url = `${host}${path}?partner_id=${this.partnerId}&timestamp=${timestamp}&sign=${sign}&redirect=${redirectUrl}`;
+        const url = `${this.host}${path}?partner_id=${this.partnerId}&timestamp=${timestamp}&sign=${sign}&redirect=${redirectUrl}`;
 
         return url;
     }
@@ -41,8 +41,6 @@ export class ShopeeService {
         // partnerKey: string,
         // shopId: number
     ): Promise<{ accessToken: string; refreshToken: string }> {
-        //https://partner.test-stable.shopeemobile.com/api/v2/auth/token/get
-        const host = 'https://partner.test-stable.shopeemobile.com';
         const path = '/api/v2/auth/token/get';
 
         const { sign, timestamp } = this.calculateAuthenSign(
@@ -51,7 +49,7 @@ export class ShopeeService {
             this.partnerKey
         );
 
-        const url = `${host}${path}?partner_id=${this.partnerId}&timestamp=${timestamp}&sign=${sign}`;
+        const url = `${this.host}${path}?partner_id=${this.partnerId}&timestamp=${timestamp}&sign=${sign}`;
 
         const headers = {
             'Content-Type': 'application/json',
@@ -88,7 +86,6 @@ export class ShopeeService {
     // partnerKey: string,
     // shopId: number
     : Promise<Object> {
-        const host = 'https://partner.test-stable.shopeemobile.com';
         const path = '/api/v2/order/get_order_list';
 
         const authorData = await ShopeeAuthorization.findOne();
@@ -120,8 +117,8 @@ export class ShopeeService {
         console.log(params);
 
         const queraParam = qs.stringify(params, { arrayFormat: 'brackets' });
-        // const url = `${host}${path}?partner_id=${partnerId}&timestamp=${timestamp}&sign=${sign}`;
-        const url = `${host}${path}?${queraParam}`;
+        // const url = `${this.host}${path}?partner_id=${partnerId}&timestamp=${timestamp}&sign=${sign}`;
+        const url = `${this.host}${path}?${queraParam}`;
 
         const headers = {
             'Content-Type': 'application/json',
@@ -138,7 +135,6 @@ export class ShopeeService {
         // shopId: number,
         orderSnList: string
     ): Promise<Object> {
-        const host = 'https://partner.test-stable.shopeemobile.com';
         const path = '/api/v2/order/get_order_detail';
 
         const authorData = await ShopeeAuthorization.findOne();
@@ -169,7 +165,7 @@ export class ShopeeService {
         };
 
         const queraParam = qs.stringify(params, { arrayFormat: 'brackets' });
-        const url = `${host}${path}?${queraParam}`;
+        const url = `${this.host}${path}?${queraParam}`;
 
         const headers = {
             'Content-Type': 'application/json',
@@ -181,7 +177,6 @@ export class ShopeeService {
     }
 
     async getShipmentList(): Promise<Object> {
-        const host = 'https://partner.test-stable.shopeemobile.com';
         const path = '/api/v2/order/get_shipment_list';
 
         const authorData = await ShopeeAuthorization.findOne();
@@ -211,7 +206,7 @@ export class ShopeeService {
         };
 
         const queraParam = qs.stringify(params, { arrayFormat: 'brackets' });
-        const url = `${host}${path}?${queraParam}`;
+        const url = `${this.host}${path}?${queraParam}`;
 
         const headers = {
             'Content-Type': 'application/json',
@@ -238,7 +233,6 @@ export class ShopeeService {
     }
 
     async getShipmentParam(orderSn: string): Promise<Object> {
-        const host = 'https://partner.test-stable.shopeemobile.com';
         const path = '/api/v2/logistics/get_shipping_parameter';
         orderSn;
         const authorData = await ShopeeAuthorization.findOne();
@@ -267,64 +261,18 @@ export class ShopeeService {
         };
 
         const queraParam = qs.stringify(params, { arrayFormat: 'brackets' });
-        const url = `${host}${path}?${queraParam}`;
+        const url = `${this.host}${path}?${queraParam}`;
 
         const headers = {
             'Content-Type': 'application/json',
         };
 
-        // const res = await this.executeGet<ShopeeResponse>(url, headers);
-        // return res.response;
-
-        return {
-            error: '',
-            message: '',
-            response: {
-                info_needed: {
-                    dropoff: [],
-                    pickup: ['address_id', 'pickup_time_id'],
-                },
-                dropoff: null,
-                pickup: {
-                    address_list: [
-                        {
-                            address_id: 123,
-                            region: 'SG',
-                            state: '',
-                            city: '',
-                            district: '',
-                            town: '',
-                            address: '',
-                            zipcode: '40009',
-                            address_flag: [
-                                'default_address',
-                                'pickup_address',
-                                'return_address',
-                            ],
-                            time_slot_list: null,
-                        },
-                        {
-                            address_id: 234,
-                            region: 'SG',
-                            state: '',
-                            city: '',
-                            district: '',
-                            town: '',
-                            address: 'hhh, #34',
-                            zipcode: 'xxx',
-                            address_flag: [],
-                            time_slot_list: null,
-                        },
-                    ],
-                },
-            },
-            request_id: '2880a5a28510424eaa3288fd941fae2c',
-        };
+        const res = await this.executeGet<ShopeeResponse>(url, headers);
+        return res.response;
     }
 
     async shipOrder(orderSn: string): Promise<Object> {
-        const host = 'https://partner.test-stable.shopeemobile.com';
-        const path = '/api/v2/logistics/ship_order';
+        const path = '/api/v2/logistics/ship-order';
 
         const authorData = await ShopeeAuthorization.findOne();
         const accessToken = !!authorData ? authorData.accessToken : '';
@@ -352,24 +300,21 @@ export class ShopeeService {
         };
 
         const queraParam = qs.stringify(params, { arrayFormat: 'brackets' });
-        const url = `${host}${path}?${queraParam}`;
+        const url = `${this.host}${path}?${queraParam}`;
 
         const headers = {
             'Content-Type': 'application/json',
         };
 
-        // const res = await this.executeGet<ShopeeResponse>(url, headers);
-        // return res.response;
-
-        return {
-            error: '',
-            message: '',
-            request_id: '3dad66f43b8447d282ae6da36626c6b7',
-        };
+        const res = await this.executePost<ShopeeResponse>(
+            url,
+            headers,
+            undefined
+        );
+        return res;
     }
 
     async getTrackingNo(orderSn: string): Promise<Object> {
-        const host = 'https://partner.test-stable.shopeemobile.com';
         const path = '/api/v2/logistics/get_tracking_number';
 
         const authorData = await ShopeeAuthorization.findOne();
@@ -398,24 +343,14 @@ export class ShopeeService {
         };
 
         const queraParam = qs.stringify(params, { arrayFormat: 'brackets' });
-        const url = `${host}${path}?${queraParam}`;
+        const url = `${this.host}${path}?${queraParam}`;
 
         const headers = {
             'Content-Type': 'application/json',
         };
 
-        // const res = await this.executeGet<ShopeeResponse>(url, headers);
-        // return res.response;
-
-        return {
-            error: '',
-            message: '',
-            response: {
-                tracking_number: 'MY200448706479IT',
-                first_mile_tracking_number: 'CNF877146678717210312',
-            },
-            request_id: '9d07076ffda5407bb7c559f0b82ed91e',
-        };
+        const res = await this.executeGet<ShopeeResponse>(url, headers);
+        return res.response;
     }
 
     private async executeGet<T>(url: string, headers: Object): Promise<T> {
@@ -449,7 +384,7 @@ export class ShopeeService {
     private async executePost<T>(
         url: string,
         headers: Object,
-        body: Object
+        body: Object | undefined
     ): Promise<T> {
         try {
             console.log('url', url);

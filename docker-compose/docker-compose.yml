@@ -1,0 +1,9 @@
+version: '1.0' # Or your preferred version
+
+services:
+    mountebank:
+        image: bbyars/mountebank
+        ports:
+            - '2525:2525'
+            - '3001:3001'
+        container_name: mountebank
