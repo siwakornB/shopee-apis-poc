@@ -43,7 +43,7 @@ export class AppController {
         return response;
     }
 
-    @Get('/order/get-shipment-list')
+    @Get('/shipping/get-shipment-list')
     async getShipmentList() // @Query('partnerId') partnerId: number,
     // @Query('partnerKey') partnerKey: string,
     // @Query('shopId') shopId: number

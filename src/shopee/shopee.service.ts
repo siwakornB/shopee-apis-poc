@@ -212,24 +212,8 @@ export class ShopeeService {
             'Content-Type': 'application/json',
         };
 
-        // const res = await this.executeGet<ShopeeResponse>(url, headers);
-
-        // return res.response;
-
-        return {
-            order_list: [
-                {
-                    order_sn: '250129R77HHR8W',
-                    package_number: '38027870177402',
-                },
-                {
-                    order_sn: '250129QSCYFRF6',
-                    package_number: '38027870177403',
-                },
-            ],
-            more: false,
-            next_cursor: '',
-        };
+        const res = await this.executeGet<ShopeeResponse>(url, headers);
+        return res.response;
     }
 
     async getShipmentParam(orderSn: string): Promise<Object> {
@@ -311,6 +295,7 @@ export class ShopeeService {
             headers,
             undefined
         );
+        // TODO there's no response in body, checking code and return success instead?
         return res;
     }
 
