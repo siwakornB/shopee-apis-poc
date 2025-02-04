@@ -338,6 +338,54 @@ export class ShopeeService {
         return res.response;
     }
 
+    async cancelOrder(
+        orderSn: string,
+        cancelReason: string,
+        itemList: object
+    ): Promise<Object> {
+        const path = '/api/v2/order/cancel_order';
+
+        const authorData = await ShopeeAuthorization.findOne();
+        const accessToken = !!authorData ? authorData.accessToken : '';
+
+        const { sign, timestamp } = this.calculateSign(
+            this.partnerId,
+            path,
+            accessToken,
+            this.shopId,
+            this.partnerKey
+        );
+
+        const params = {
+            // common params
+            partner_id: this.partnerId,
+            sign: sign,
+            timestamp: timestamp,
+            access_token: accessToken,
+            shop_id: this.shopId,
+
+            // required api params
+            order_sn: orderSn,
+            cancel_reason: 'OUT_OF_STOCK', // Applicable values: OUT_OF_STOCK, UNDELIVERABLE_AREA(only apply for TW and MY).
+            // in case of cancel_reason is OUT_OF_STOCK.
+            item_list: {
+                item_id: 1680783,
+                model_id: 327890123,
+            },
+            // optional
+        };
+
+        const queraParam = qs.stringify(params, { arrayFormat: 'brackets' });
+        const url = `${this.host}${path}?${queraParam}`;
+
+        const headers = {
+            'Content-Type': 'application/json',
+        };
+
+        const res = await this.executeGet<ShopeeResponse>(url, headers);
+        return res.response;
+    }
+
     private async executeGet<T>(url: string, headers: Object): Promise<T> {
         try {
             console.log('url', url);

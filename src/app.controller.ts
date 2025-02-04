@@ -43,6 +43,20 @@ export class AppController {
         return response;
     }
 
+    @Post('/order/cancel-order')
+    async cancelOrder(
+        @Body('orderSn') orderSn: string,
+        @Body('cancelReason') cancelReason: string,
+        @Body('itemList') itemList: Object
+    ): Promise<Object> {
+        const response = this.shopeeService.cancelOrder(
+            orderSn,
+            cancelReason,
+            itemList
+        );
+        return response;
+    }
+
     @Get('/shipping/get-shipment-list')
     async getShipmentList() // @Query('partnerId') partnerId: number,
     // @Query('partnerKey') partnerKey: string,
